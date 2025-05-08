@@ -1,1 +1,1 @@
-# advances-final-project
+# Advances in Computer Vision Project

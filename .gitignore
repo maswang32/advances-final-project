@@ -1,0 +1,10 @@
+huggingface
+
+# Python Files
+**/__pycache__
+*.py[cod]
+/.vscode
+**/*.egg-info
+
+# Notebooks
+scratch
