@@ -9,8 +9,7 @@ huggingface
 # Notebooks
 scratch
 
-_cache_datahairessharedtempdatasetsartartnouveaulmdb
-_cache_datahairessharedtempdatasetsartbaroquelmdb
-_cache_datahairessharedtempdatasetsartrealismlmdb
 
-exp/*pt
+# Checkpoints
+*.pt
+*.npy

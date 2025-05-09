@@ -7,7 +7,6 @@ from tqdm import tqdm
 from advances_project.data.artbench import get_loader
 from diffusers import UNet2DConditionModel, DDPMScheduler, AutoencoderKL
 from transformers import CLIPTextModel, CLIPTokenizer
-
 from torch.optim import Adam
 
 
@@ -97,7 +96,7 @@ def generate(
 
 
 if __name__ == "__main__":
-    device = "cuda:7"
+    device = "cuda"
     batch_size = 16
     lr = 1e-5
     num_epochs = 1
@@ -176,7 +175,7 @@ if __name__ == "__main__":
                 torch.save(ckpt, path)
                 print(f"[Checkpoint] Saved {path}")
 
-                np.save("exp/losses.npy")
+                np.save("exp/losses.npy", losses)
 
                 generate(
                     vae=vae,
