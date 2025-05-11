@@ -10,6 +10,5 @@ huggingface
 scratch
 
 
-# Checkpoints
-*.pt
-*.npy
+# exp
+exp

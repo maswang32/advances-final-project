@@ -12,7 +12,7 @@ class NormalizedDataset(Dataset):
                     res, interpolation=transforms.InterpolationMode.LANCZOS
                 ),
                 transforms.CenterCrop(res),
-                transforms.ToTensor(),  # [0,1]
+                transforms.ToTensor(),
                 transforms.Normalize([0.5] * 3, [0.5] * 3),
             ]
         )

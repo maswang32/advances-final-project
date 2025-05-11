@@ -26,16 +26,20 @@ def load_models(
     scheduler = DDPMScheduler.from_pretrained(
         model_id, subfolder="scheduler", cache_dir=cache_dir
     )
-
     tokenizer = CLIPTokenizer.from_pretrained(
         "openai/clip-vit-large-patch14", cache_dir=cache_dir
     )
-
     text_encoder = CLIPTextModel.from_pretrained(
         "openai/clip-vit-large-patch14", cache_dir=cache_dir
     ).to(device)
 
-    return vae, unet, scheduler, tokenizer, text_encoder
+    return {
+        "vae": vae,
+        "unet": unet,
+        "scheduler": scheduler,
+        "tokenizer": tokenizer,
+        "text_encoder": text_encoder,
+    }
 
 
 @torch.no_grad()
