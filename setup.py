@@ -13,5 +13,6 @@ setup(
         "transformers",
         "accelerate",
         "lmdb",
+        "matplotlib",
     ],
 )
