@@ -113,8 +113,8 @@ class Encoder(nn.Module):
         data_resolution=512,
         in_channels=3,
         out_channels=4,
-        dims=[128, 256, 256, 512],
-        num_blocks_per_res=4,
+        dims=[32, 32, 64, 128],
+        num_blocks_per_res=3,
         kernel_size=3,
     ):
         super().__init__()

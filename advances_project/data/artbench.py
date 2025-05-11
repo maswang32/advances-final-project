@@ -6,7 +6,7 @@ from advances_project.data.data_utils import NormalizedDataset
 
 def get_loader(
     root="/data/hai-res/shared/temp/datasets/art",
-    batch_size=32,
+    batch_size=8,
     split="train",
     num_workers=4,
     res=512,

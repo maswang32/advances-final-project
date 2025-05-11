@@ -13,7 +13,7 @@ class FMDiffAE:
         self.device = device
 
         self.encoder = Encoder(out_channels=feature_map_channels).to(self.device)
-        self.fftmask = FFTMask()
+        self.fftmask = FFTMask().to(self.device)
         self.load_stable_diffusion()
 
         with torch.no_grad():
@@ -30,36 +30,49 @@ class FMDiffAE:
         self,
         model_id="stable-diffusion-v1-5/stable-diffusion-v1-5",
         cache_dir="/data/scratch/ycda/cache/huggingface",
+        first_layer_weights_path="/data/hai-res/ycda/advances_project/advances_project/diffusion/unet_convin_init_weights.pt",
     ):
-        self.vae = (
-            AutoencoderKL.from_pretrained(
-                model_id, subfolder="vae", cache_dir=cache_dir
+        with torch.no_grad():
+            self.vae = (
+                AutoencoderKL.from_pretrained(
+                    model_id, subfolder="vae", cache_dir=cache_dir
+                )
+                .to(self.device)
+                .eval()
+                .requires_grad_(False)
             )
-            .to(self.device)
-            .eval()
-        )
 
-        self.unet = UNet2DConditionModel.from_pretrained(
-            model_id,
-            subfolder="unet",
-            cache_dir=cache_dir,
-            in_channels=(4 + self.feature_map_channels),
-            ignore_mismatched_sizes=True,
-        ).to(self.device)
+            self.unet = UNet2DConditionModel.from_pretrained(
+                model_id,
+                subfolder="unet",
+                cache_dir=cache_dir,
+                in_channels=(4 + self.feature_map_channels),
+                ignore_mismatched_sizes=True,
+                low_cpu_mem_usage=False,
+            )
 
-        self.scheduler = DDPMScheduler.from_pretrained(
-            model_id, subfolder="scheduler", cache_dir=cache_dir
-        )
-        self.tokenizer = CLIPTokenizer.from_pretrained(
-            "openai/clip-vit-large-patch14", cache_dir=cache_dir
-        )
-        self.text_encoder = (
-            CLIPTextModel.from_pretrained(
+            # Initialize the weights
+            first_layer_weights = torch.load(first_layer_weights_path)
+            self.unet.conv_in.weight.data[:, :4, :, :] = first_layer_weights
+            self.unet.conv_in.weight.data[:, 4:, :, :] = (
+                torch.randn_like(first_layer_weights) * 1e-2
+            )
+            self.unet = self.unet.to(self.device)
+
+            self.scheduler = DDPMScheduler.from_pretrained(
+                model_id, subfolder="scheduler", cache_dir=cache_dir
+            )
+            self.tokenizer = CLIPTokenizer.from_pretrained(
                 "openai/clip-vit-large-patch14", cache_dir=cache_dir
             )
-            .to(self.device)
-            .eval()
-        )
+            self.text_encoder = (
+                CLIPTextModel.from_pretrained(
+                    "openai/clip-vit-large-patch14", cache_dir=cache_dir
+                )
+                .to(self.device)
+                .eval()
+                .requires_grad_(False)
+            )
 
     def forward(self, x):
         bs = x.shape[0]
@@ -98,8 +111,9 @@ class FMDiffAE:
     def generate(
         self,
         inputs,
+        masks,
         num_steps=50,
-        cfg_scale=7,
+        cfg_scale=2,
     ):
         bs = inputs.shape[0]
         device = inputs.device
@@ -109,6 +123,7 @@ class FMDiffAE:
 
         # Get Feature Map
         feature_map = self.encoder(inputs)
+        feature_map = self.fftmask(feature_map, provided_group_masks=masks)
         feature_map = torch.cat([feature_map, torch.zeros_like(feature_map)], dim=0)
 
         latents = torch.randn((bs, 4, 64, 64), device=device, dtype=torch.float32)
@@ -133,5 +148,4 @@ class FMDiffAE:
 
         latents = latents / self.vae.config.scaling_factor
         decoded = self.vae.decode(latents).sample
-        decoded = (decoded * 0.5 + 0.5).clamp(0, 1)
         return decoded
