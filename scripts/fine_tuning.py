@@ -63,9 +63,7 @@ def generate(
     uncond_embs = text_encoder(**uncond_tokens).last_hidden_state
     embeddings = torch.cat([uncond_embs, prompt_embeddings[:batch_size]])
 
-    latents = torch.randn(
-        (batch_size, unet.in_channels, 64, 64), device=device, dtype=torch.float32
-    )
+    latents = torch.randn((batch_size, 4, 64, 64), device=device, dtype=torch.float32)
 
     scheduler.set_timesteps(num_steps)
     for t in tqdm(scheduler.timesteps):
