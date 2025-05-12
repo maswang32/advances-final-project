@@ -13,7 +13,7 @@ if __name__ == "__main__":
             [1, 1, 1, 1, 0, 0],
             [1, 1, 1, 1, 1, 0],
             [0, 1, 1, 1, 1, 1],
-            [0, 0, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 1],
             [0, 0, 0, 1, 1, 1],
             [0, 0, 0, 0, 1, 1],
             [0, 0, 0, 0, 0, 1],
@@ -24,5 +24,9 @@ if __name__ == "__main__":
         ],
         device="cuda",
     )
-    trainer = Trainer(save_dir, eval_masks=eval_masks)
+    trainer = Trainer(
+        save_dir,
+        eval_masks=eval_masks,
+        load_path="/data/hai-res/ycda/advances_project/exp/test/latest.pt",
+    )
     trainer.train_loop()

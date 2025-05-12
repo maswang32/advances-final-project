@@ -48,8 +48,10 @@ class Trainer:
         self.train_losses = []
         self.valid_losses = []
         self.recon_losses = []
+        self.ckpt_dir = os.path.join(self.save_dir, "checkpoints")
         self.output_dir = os.path.join(self.save_dir, "outputs")
         os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.ckpt_dir, exist_ok=True)
 
     @torch.no_grad()
     def valid_loss(self, num_iters=16):
@@ -151,7 +153,7 @@ class Trainer:
             "encoder_state": self.fmdiffae.encoder.state_dict(),
             "optimizer_state": self.optimizer.state_dict(),
         }
-        torch.save(ckpt, os.path.join(self.save_dir, "latest.pt"))
+        torch.save(ckpt, os.path.join(self.ckpt_dir, f"{self.step}.pt"))
 
         np.save(os.path.join(self.save_dir, "train_losses.npy"), self.train_losses)
         np.save(os.path.join(self.save_dir, "valid_losses.npy"), self.valid_losses)

@@ -22,6 +22,7 @@ def get_loader(
         "surrealism",
         "ukiyo_e",
     ],
+    drop_last=True,
 ):
     LSUN._verify_classes = lambda self, classes: list(classes)
     dataset = NormalizedDataset(LSUN(classes=classes, root=root), res=res)
@@ -42,5 +43,5 @@ def get_loader(
         batch_size=batch_size,
         shuffle=(split == "train"),
         num_workers=num_workers,
-        drop_last=True,
+        drop_last=drop_last,
     )
